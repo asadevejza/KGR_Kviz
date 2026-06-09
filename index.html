@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="bs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KGR Kviz — 186 pitanja</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#f7f6f2;
+  --surface:#ffffff;
+  --border:#e8e6df;
+  --border-hover:#c8c5bc;
+  --text:#1a1a1a;
+  --text-muted:#6b6966;
+  --text-hint:#a09d97;
+  --radius:14px;
+  --radius-sm:9px;
+  --shadow:0 2px 12px rgba(0,0,0,.07);
+}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding:2rem 1rem}
+.w{max-width:680px;margin:0 auto}
+
+/* MENU */
+.header{margin-bottom:2rem}
+.header h1{font-size:22px;font-weight:600;letter-spacing:-.3px}
+.header p{font-size:14px;color:var(--text-muted);margin-top:5px}
+.mgrid{display:grid;grid-template-columns:repeat(7,1fr);gap:10px;margin:1.25rem 0}
+@media(max-width:520px){.mgrid{grid-template-columns:repeat(3,1fr)}}
+.mc{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius);padding:1rem .75rem;cursor:pointer;text-align:center;transition:all .15s;border-top-width:4px;box-shadow:var(--shadow)}
+.mc:hover{border-color:var(--border-hover);transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,.1)}
+.mc.done{opacity:.85}
+.mn{font-size:22px;font-weight:700;line-height:1}
+.ml{font-size:11px;color:var(--text-muted);margin-top:5px;line-height:1.4}
+.ms{font-size:10px;font-weight:600;margin-top:5px}
+.tot{margin-top:.75rem;padding:12px 16px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);font-size:14px;color:var(--text-muted)}
+.tot strong{color:var(--text)}
+
+/* PROGRESS */
+.quiz-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.bk{font-size:13px;color:var(--text-muted);background:none;border:none;cursor:pointer;padding:4px 0;display:flex;align-items:center;gap:5px;transition:color .15s}
+.bk:hover{color:var(--text)}
+.score-badge{font-size:13px;color:var(--text-muted)}
+.pb{height:5px;background:var(--border);border-radius:3px;margin-bottom:1.25rem;overflow:hidden}
+.pf{height:5px;border-radius:3px;transition:width .4s cubic-bezier(.4,0,.2,1)}
+
+/* QUESTION CARD */
+.qc{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem;margin-bottom:1rem;box-shadow:var(--shadow)}
+.qn{font-size:12px;color:var(--text-hint);margin-bottom:8px;font-weight:500;text-transform:uppercase;letter-spacing:.5px}
+.qt{font-size:15px;color:var(--text);line-height:1.6;margin-bottom:1.25rem;font-weight:500}
+.opts{display:flex;flex-direction:column;gap:8px}
+.ob{display:flex;align-items:flex-start;gap:12px;padding:11px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);background:var(--surface);cursor:pointer;text-align:left;font-size:14px;color:var(--text);transition:all .15s;width:100%;line-height:1.45}
+.ob:hover:not(:disabled){background:#f5f4ef;border-color:var(--border-hover)}
+.ob .l{font-weight:700;min-width:20px;font-size:12px;color:var(--text-hint);flex-shrink:0;margin-top:1px}
+.ob.cor{background:#eaf3de;border-color:#639922}
+.ob.cor .l{color:#3B6D11}
+.ob.wr{background:#fcebeb;border-color:#A32D2D}
+.ob.wr .l{color:#A32D2D}
+.ob.sel{background:#EEEDFE;border-color:#534AB7}
+.ob.sel .l{color:#534AB7}
+.ob:disabled{cursor:default}
+
+/* FEEDBACK */
+.fb{margin-top:12px;padding:10px 14px;border-radius:var(--radius-sm);font-size:13px;line-height:1.55;display:flex;align-items:flex-start;gap:9px}
+.fb-icon{font-size:15px;flex-shrink:0;margin-top:1px}
+.fb.ok{background:#eaf3de;color:#3B6D11}
+.fb.no{background:#fcebeb;color:#A32D2D}
+
+
+
+/* NAV */
+.nav{display:flex;justify-content:space-between;align-items:center;margin-top:.5rem}
+.nb{padding:9px 20px;border:1.5px solid var(--border);border-radius:var(--radius-sm);background:var(--surface);color:var(--text);font-size:14px;font-weight:500;cursor:pointer;transition:all .15s}
+.nb:hover:not(:disabled){background:#f0efe9;border-color:var(--border-hover)}
+.nb:disabled{opacity:.3;cursor:default}
+.nb.p{background:#534AB7;border-color:#534AB7;color:#fff}
+.nb.p:hover:not(:disabled){background:#3C3489;border-color:#3C3489}
+.nb.skip{background:transparent;border-color:transparent;color:var(--text-muted);font-size:13px;padding:9px 12px}
+.nb.skip:hover:not(:disabled){color:var(--text);background:var(--surface);border-color:var(--border)}
+.nav-center{font-size:13px;color:var(--text-hint)}
+
+/* RESULTS */
+.sc{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:2.5rem 2rem;text-align:center;box-shadow:var(--shadow)}
+.sc-icon{font-size:48px;margin-bottom:.5rem}
+.sb{font-size:52px;font-weight:700;line-height:1.1;letter-spacing:-1px}
+.sg{display:grid;grid-template-columns:1fr 1fr;gap:10px;max-width:260px;margin:1.25rem auto}
+.sx{background:var(--bg);border-radius:var(--radius-sm);padding:14px 12px}
+.sx-val{font-size:24px;font-weight:700}
+.sx-lbl{font-size:12px;color:var(--text-muted);margin-top:3px}
+.sc-msg{font-size:14px;color:var(--text-muted);margin:8px 0 1.5rem}
+.sc-actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:1.5rem}
+
+/* REVIEW */
+.rv-item{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem 1.5rem;margin-bottom:.75rem;box-shadow:var(--shadow)}
+.rv-tag{display:inline-block;font-size:11px;font-weight:600;padding:2px 8px;border-radius:20px;margin-bottom:8px;text-transform:uppercase;letter-spacing:.4px}
+.rv-tag.ok{background:#eaf3de;color:#3B6D11}
+.rv-tag.no{background:#fcebeb;color:#A32D2D}
+.rv-q{font-size:14px;font-weight:500;color:var(--text);line-height:1.55;margin-bottom:10px}
+.rv-opt{font-size:13px;padding:7px 12px;border-radius:var(--radius-sm);margin-bottom:5px;display:flex;align-items:flex-start;gap:9px;line-height:1.4}
+.rv-opt.cor{background:#eaf3de;color:#3B6D11}
+.rv-opt.wr{background:#fcebeb;color:#A32D2D}
+.rv-opt.neu{background:var(--bg);color:var(--text-muted)}
+.rv-opt .l{font-weight:700;font-size:12px;min-width:18px;flex-shrink:0}
+
+/* MISTAKES CARD */
+.mc-err{background:var(--surface);border:1.5px solid #e8c8c8;border-radius:var(--radius);padding:1rem .75rem;cursor:pointer;text-align:center;transition:all .15s;border-top-width:4px;box-shadow:var(--shadow);border-top-color:#A32D2D}
+.mc-err:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,.1)}
+</style>
+</head>
+<body>
+<div class="w"><div id="root"></div></div>
+<script>
+const Q=[
+{q:"Rezolucija monitora klasična je 72 do 100ppi",o:["Da","Ne"],c:0},
+{q:"Frekvencija talasa svjetlosti predstavlja",o:["Njenu boju","Ništa od navedenog","Njenu amplitudu","Njen intenzitet"],c:0},
+{q:"Koliko je mogućih načina orijentacije Kartezijevih osa?",o:["8","Ništa od navedenog","6","4"],c:0},
+{q:"TIFF može imati",o:["2 gigapiksela","Ništa od navedenog","4 gigapiksela","8 gigapiksela"],c:2},
+{q:"Quantization predstavlja",o:["Dužinu vremenskog intervala u kojem se vrši mjerenje","Ništa od navedenog","Intenzitet zvučnog signala","Amplitudu zvučnog signala"],c:2},
+{q:"Ljudsko oko detektuje svjetlost fotoreceptorima u oku",o:["Da","Ne"],c:0},
+{q:"Supstraktivni model radi",o:["Blokiranjem crvene svjetlosti pigmentima na bijeloj podlozi","Blokiranjem bijele svjetlosti pigmentima na bijeloj podlozi","Blokiranjem bijele svjetlosti pigmentima na crvenoj podlozi","Ništa od navedenog"],c:1},
+{q:"Pojam sampling rate predstavlja",o:["Dužinu amplitude intervala","Dužinu vremenskog intervala u kojem se vrši mjerenje","Intenzitet zvučnog signala","Ništa od navedenog"],c:1},
+{q:"Vidljiva svjetlost je dio spektra elektromagnetnog zračenja talasnih dužina",o:["Od 600–800nm","Od 200–400nm","Ništa od navedenog","Od 400–700nm"],c:3},
+{q:"Najčešće uobičajene jedinice za opisivanje kvaliteta slike — odaberi NETAČNU skraćenicu",o:["DPI (tačke po incu)","LPI (linije po incu)","SPI (uzorci po incu)","PPN (pikseli po incu)"],c:3},
+{q:"Koje godine je Ivan Sutherland razvio prvi interaktivni grafički sistem Sketchpad?",o:["1958","1962","1970","1973"],c:1},
+{q:"Kompresija koristi nesavršenost ljudskih čula",o:["Da","Ne"],c:0},
+{q:"Algebarska tehnika se koristi za",o:["Definisanje i evoluiranje jednakosti vezanih za taj prostor","Definisanje rezolucije","Definisanje rasterske tehnike","Ništa od navedenog"],c:0},
+{q:"Od koje ose zavisi da li je 3D koordinatni sistem lijevi ili desni?",o:["y-osa je dubina — da li je pozitivan smjer 'u' ili 'iz' ekrana","x-osa je dubina — da li je pozitivan smjer 'u' ili 'iz' ekrana","z-osa je dubina — da li je pozitivan smjer 'u' ili 'iz' ekrana","Ništa od navedenog"],c:2},
+{q:"Šta je svjetlost?",o:["Elektromagnetno zračenje koje se prenosi u malim paketima energije (kvantomi)","Ništa od navedenog","Elektromagnetno zračenje koje se prenosi u malim paketima energije (fotoni)","Elektromagnetno zračenje koje se prenosi u malim paketima energije (luksi)"],c:2},
+{q:"U 3D Kartezijevom prostoru, od čega zavisi orijentacija sistema?",o:["y-osa je dubina","x-osa je dubina","z-osa je dubina — da li je pozitivan smjer 'u' ili 'iz' ekrana","Ništa od navedenog"],c:2},
+{q:"Za prikaz slike na monitoru koristi se aditivni model boja (RGB)",o:["Da","Ne"],c:0},
+{q:"Koliko boja ima aditivni model?",o:["5","4","3"],c:2},
+{q:"Za matricu kažemo da je kvadratna ako je",o:["m < n","m > n","m = n","Ništa od navedenog"],c:2},
+{q:"Pigment je hemikalija koja apsorbuje jednu ili više boja, odnosno svjetlost određene talasne dužine",o:["Da","Ne"],c:0},
+{q:"Svaki 2D Kartezijev koordinatni sistem ima posebnu lokaciju koja se zove",o:["Ništa od navedenog","Nacrt","Osa simetrije","Koordinatni početak"],c:3},
+{q:"Koja je tačna relacija?",o:["180 = π rad","360 = π rad","90 = π rad","Ništa od navedenog"],c:0},
+{q:"Trihromatske teorije svjetlosti je dao",o:["Newton","Young-Helmholtz","Goethe"],c:1},
+{q:"Tehnologija Digital Taste Interface",o:["Ništa od navedenog","Stimulira čulo mirisa pomoću termalne i električne stimulacije","Stimulira čulo okusa na jeziku pomoću termalne i električne stimulacije"],c:2},
+{q:"JPEG može kompresovati sliku koliko puta?",o:["8","Ništa od navedenog","12","10"],c:3},
+{q:"Glavnu dijagonalu kvadratne matrice čine elementi čiji su indeksi reda i vrste",o:["Indeks vrste veći od indeksa reda","Ništa od navedenog","Indeks reda veći od indeksa vrste","Jednaki"],c:3},
+{q:"Aditivni model se dobija",o:["Dodavanjem svjetlosti na crvenu podlogu","Dodavanjem svjetlosti na crnu podlogu","Dodavanjem svjetlosti na bijelu podlogu","Ništa od navedenog"],c:1},
+{q:"Koliko bita zauzima JPEG?",o:["4","8","16"],c:1},
+{q:"Ko je osmislio vlastiti sistem analitičke geometrije?",o:["Kartizije","Ništa od navedenog","Rene Descartes","Blaise Pascal"],c:2},
+{q:"Amplituda svjetlosnog talasa predstavlja",o:["Intenzitet osvjetljenja","Intenzitet talasa","Ništa od navedenog","Intenzitet talasne dužine"],c:0},
+{q:"Šta je SpaceExplorer?",o:["Uređaj za navigaciju u prostoru","Uređaj za manipulaciju objektima u prostoru kod 3D modeliranja","Uređaj za istraživanje svemira","Ništa od navedenog"],c:1},
+{q:"UHS (Ultra High Speed) sabirnica podržava brzinu",o:["Od 32 do 64 MB/s","Od 64 do 128 MB/s","Od 50 do 624 MB/s"],c:2},
+{q:"Šta je otkrio James Clerk Maxwell?",o:["Uslikao sliku kroz žuti, zeleni i bijeli filter — dobio kolor sliku","Uslikao istu sliku kroz crveni, zeleni i plavi filter — projektovao i dobio kolor sliku","Uslikao sliku kroz žuti, crni i bijeli filter — dobio kolor sliku"],c:1},
+{q:"Gamut je dio prostora boja koji se može reprodukovati nekim uređajem",o:["Da","Ne"],c:0},
+{q:"Označite korak koji NE pripada Sutherland–Hodgman ili CyrusBeck algoritmu",o:["Odrezati neželjene dijelove / izvršiti perspektivnu transformaciju","Locirati i pozicionirati kameru","Definisati nevidljive scene","Konvertovati vrhove pomoću te matrice","Sračunati matricu za konverziju vrhova iz WCS u CCS"],c:2},
+{q:"Bézierove krive — označi što NE pripada definiciji",o:["Dvije kontrolne tačke P3 i P4 koje određuju vektore smjera u krajnjim tačkama","Dvije krajnje tačke P1 i P2","Tri krajnje tačke P1, P2 i P3"],c:2},
+{q:"Koja se tehnika koristi za štampu?",o:["RGB","Ništa od navedenog","CMY","CMYK"],c:3},
+{q:"Postupak koji je osmislio Watkins često se naziva i kao?",o:["Algoritam poligona pretrage (Scan-polygon)","Algoritam kružnice pretrage (Scan-circle)","Algoritam linije pretrage (Scan-line)"],c:2},
+{q:"Šta predstavlja digitalni diferencijalni analizator (DDA)?",o:["Algoritam za numeričko rješavanje eksponencijalnih jednačina","Algoritam za numeričko rješavanje diferencijalnih jednačina","Algoritam za rješavanje linearnih jednačina"],c:1},
+{q:"Koji oblik matematičkog prikaza krivih linija NE postoji?",o:["Parametarski","Ekstrapolacija","Eksplicitni","Implicitni"],c:1},
+{q:"Koji je zadatak OCR (Optical Character Recognition)?",o:["Rastersku sliku pretvara u tekst","Rastersku sliku pretvara u poligon","Rastersku sliku pretvara u krivu"],c:0},
+{q:"Šta predstavlja postupak AABB (Axes Aligned Bounding Box)?",o:["Koristi se pri detekciji aproksimacije dva objekta","Koristi se pri detekciji interpolacije dva objekta","Koristi se pri detekciji kolizije dva objekta upoređivanjem s koordinatnim osama"],c:2},
+{q:"Ako je Np·N < 0, poligon je...",o:["Stražnji","Prednji (vidljiv)","Degenerirao u liniju (za posmatrača)"],c:0},
+{q:"Koji su osnovni koraci u ispunjavanju primitiva?",o:["Izbor rezolucije","Izbor ugla nagiba","Izbor piksela koje treba ispuniti (zavisi od oblika)"],c:2},
+{q:"Osnovni koraci ispunjavanja su: izbor piksela + izbor vrijednosti za odabrane piksele",o:["Da","Ne"],c:0},
+{q:"Na koliko dijelova JPEG dijeli blokove?",o:["8×8","4×4","16×16","32×32"],c:0},
+{q:"Parametarski kontinuitet C0 — označi što NE pripada definiciji",o:["Parametarski kontinuitet Cn — jednakost n-te derivacije","Parametarski kontinuitet C1 — jednakost parametara u tački dodira","Parametarski kontinuitet C0 — jednakost parametara u tački dodira"],c:2},
+{q:"Šta je pinhole kamera?",o:["Box sa fotografskim filmom F pozadi i malom rupom H koja propušta svjetlo","Box sa fotografskim filmom F naprijed i malom rupom H koja propušta svjetlo","Ništa od navedenog"],c:0},
+{q:"Šta radi Midpoint-line algoritam?",o:["Uzima koordinate početka linije kao ulaz","Uzima koordinate krajeva linije kao ulaz i računa sve piksele između","Uzima koordinate krajeva linije i vraća koordinate krajeva"],c:1},
+{q:"Upotrebom konstante GL_FRONT_AND_BACK možemo ukloniti",o:["Prednje poligone","I prednje i stražnje poligone","Stražnje poligone"],c:1},
+{q:"Uslovi za Hermitove krive su dvije krajnje tačke i dva vektora smjera u krajnjim tačkama",o:["Da","Ne"],c:0},
+{q:"Šta je translacija u Kartezijevim koordinatama?",o:["Preslikavanje između brojeva i grafova (likova u 2D, tijela u 3D)","Preslikavanje između brojeva i geometrijskih objekata (likova u 2D, tijela u 3D)","Premještanje između brojeva i geometrijskih objekata"],c:1},
+{q:"Šta vidi matematička kamera u kompjuterskoj grafici?",o:["Scene koje se fizički nalaze ispred nje i unutar polja pogleda objektiva","Efektivno 'vidi' sve","Ništa od navedenog"],c:1},
+{q:"Šta sadrži informaciju o promjeni po x u tablici bridova (ET)?",o:["x-koordinatu početka koji ima manju y-koordinatu","y-koordinatu drugog početka brida","Promjenu po x (delta x) pri prelasku u sljedeću liniju pretrage"],c:2},
+{q:"Gdje se parametarske krive linije trećeg reda najčešće koriste?",o:["Za modeliranje primitive u računarskoj grafici","Za modeliranje poligona u računarskoj grafici","Za modeliranje krivih linija u računarskoj grafici"],c:2},
+{q:"Za šta služi 'triangle_data'?",o:["Sadrži podatke o jednom poligonu","Sadrži podatke o jednom bridu trokutu","Sadrži podatke o jednom trokutu"],c:2},
+{q:"Ako je Np·N > 0, poligon je...",o:["Stražnji","Degenerirao u liniju (za posmatrača)","Prednji"],c:2},
+{q:"Osnovni inkrementalni algoritam — označi korak koji NE pripada",o:["Proračun vrijednosti yi = mxi + B","Sticanje piksela (xi, Round(yi))","Ugao pravca k = x2 + b","Proračun nagiba pravca","Proračun nove vrijednosti xi povećanjem prethodne za 1"],c:2},
+{q:"Prednosti vektorske grafike nad rasterskom grafikom",o:["Kvalitet slike određuje ukupan broj piksela i dubina boje","Ništa od navedenog","Sve informacije su zapamćene i mogu se mijenjati — micanje, razmjeravanje ne smanjuje kvalitet"],c:2},
+{q:"Koliko bajta zauzima GIF?",o:["4","32","8","6","2","16"],c:2},
+{q:"Koje su vrste 2D koordinatnih sistema?",o:["Pravougli i polarni","Pravougli i cilindrični","Cilindrični i polarni","Sva tri"],c:0},
+{q:"Kakav je proces slikanja scene kod pinhole kamere?",o:["Zrake se generišu od midpointa prema objektu","Zrake se generišu od outpointa prema objektu","Zrake (projectors) se generišu od viewpointa prema objektu"],c:2},
+{q:"Kako se posmatra Image plane pinhole kamere?",o:["Višedimenzionalna mreža koja sadrži kolor informaciju mapiranu na piksele ekrana","Trodimenzionalna mreža koja sadrži kolor informaciju mapiranu na piksele ekrana","Dvodimenzionalna mreža koja sadrži kolor informaciju mapiranu na piksele ekrana pomoću viewing transformacija"],c:2},
+{q:"Kod laserskog 3D skeniranja, šta je rezultat?",o:["Ništa od navedenog","Oblak tačaka","Projekcija tačaka","Refleksija tačaka"],c:1},
+{q:"Windows fontovi su definirani kao vektorska grafika",o:["Da","Ne"],c:0},
+{q:"Šta je ovaj AutoLisp program? (command 'CIRCLE' c r)",o:["AutoLisp program za elipsu","AutoLisp program za kružnicu","AutoLisp program za poliedar"],c:1},
+{q:"Označi tablice bridova",o:["PT","APT","ET","AET","PET"],c:[2,3]},
+{q:"Backface culling je uklanjanje nevidljivih linija i stranica",o:["Da","Ne"],c:0},
+{q:"Šta NE sadrži Tablica poligona (PT)?",o:["x-koordinatni početak koji ima manju y-koordinatu","Zastavica koja određuje je li poligon aktivan","Koeficijente jednadžbe ravnine","Druge podatke (boja, tekstura i sl.)"],c:0},
+{q:"Na koje vrste se dijeli CAD softver?",o:["Vektorski, hibridni i specijalizirani","Hibridni, univerzalni i specijalizirani namjenski","Univerzalni, multidimenzionalni i vektorski","Sve navedeno"],c:1},
+{q:"Za šta služi Minmaks provjera?",o:["Provjera da li je poligon degenerirao","Brza provjera da li se prednji i stražnji poligoni preklapaju","Brza provjera da li se dva objekta NE preklapaju"],c:2},
+{q:"Šta je vektorska grafika?",o:["Način prikazivanja slike pomoću geometrijskih oblika","Način prikazivanja 3D objekata"],c:0},
+{q:"Navesti nedostatak implicitnog oblika u primjenama računarske grafike",o:["Nisu moguće višestruke vrijednosti x","Problem s kontinuitetom tangenti u dodirnim tačkama različitih segmenata","Teškoće s horizontalnim tangentama"],c:1},
+{q:"Koji omjer imaju CAD crteži?",o:["1:2","1:1","1:10"],c:1},
+{q:"Koji su formati za razmjenu između softvera?",o:["IGES, XFTP i STEP","IGES, STEP i DXF","STEP, DXF i HEKS","DXF, HEKS i IGES"],c:1},
+{q:"Scan konverzija je proces u kojem se neki oblik aktiviranjem piksela iscrtava na ekranu",o:["Da","Ne"],c:0},
+{q:"Koje su vrste 3D koordinatnih sistema?",o:["Sferni, pravougli i polarni","Sferni, pravougli i cilindrični","Pravougli, cilindrični i polarni","Sva četiri"],c:1},
+{q:"Kod 3D skeniranja tehnikom fringe-projection šta se dešava sa slikom?",o:["Od dobijenih slika vrši triangulaciju","Od dobijenih slika vrši refleksiju","Ništa od navedenog","Od dobijenih slika vrši interpolaciju"],c:0},
+{q:"Koji od navedenih NIJE jednostavni geometrijski oblik?",o:["Ništa od navedenog","Boja","Piksel","Bezier kriva"],c:3},
+{q:"3D primitivi — označi primitiv koji NE pripada ovoj grupi",o:["Kugla","Piramida","Konus","Torus","Cilindar","Kružnica","Prizma"],c:5},
+{q:"Omeđujući kvadri su minimalni kvadri koji u cjelosti obuhvataju objekat",o:["Da","Ne"],c:0},
+{q:"Šta je API OpenGL (Open Graphics Library)?",o:["Programski interfejs prema grafičkom hardveru koji kontroliše ulazno/izlazne operacije interaktivno","Programski interfejs prema grafičkom hardveru, neovisan o platformi, koji kontroliše skup specifičnih operacija crtanja 2D/3D","Programski interfejs prema grafičkom hardveru koji kontroliše rad grafičke kartice"],c:1},
+{q:"Prema definiciji J.Vince-a, vizualni izlaz iz sistema za animaciju je?",o:["Ono što se efektivno može vidjeti kroz scenu","Ono što se efektivno može vidjeti kroz monitor","Ono što se efektivno može vidjeti kroz kameru"],c:2},
+{q:"Za šta služi struktura 'edge_data'?",o:["Pamćenje podataka o jednom bridu (ivici)","Pamćenje podataka o dva brida (ivice)","Pamćenje podataka o tri brida (ivice)"],c:0},
+{q:"Softver za konstruisanje je",o:["DTP","CAD"],c:1},
+{q:"Šta se postiže sa backface cullingom?",o:["Smanjenje grafičke kompleksnosti","Ubrzanje rendering pipelinea"],c:1},
+{q:"Rasterizacija poligona liniju po liniju — koji postupak?",o:["Postupak Schönkensa","Postupak Watkinsa"],c:1},
+{q:"Geometrijski kontinuitet — označi što NE pripada definiciji",o:["G0 — neprekinutost krive u tački dodira odsječaka","G — kontinuitet poligona","G1 — jednakost vektora smjera tangente u tački dodira"],c:1},
+{q:"Kod Minmaks provjere koliko uslova je potrebno zadovoljiti?",o:["2","8","6","4"],c:3},
+{q:"AABB znači",o:["Axes aligned bounding box","Aligned axes box bounding","Axes aligned box bounding"],c:0},
+{q:"Po čemu se razlikuju LCD i LED ekran?",o:["LCD ima LED diode, LED ima fluorescentne lampe","LCD ima fluorescentne lampe, LED ima LED diode"],c:1},
+{q:"DTP softver služi za",o:["Konstruisanje","Dizajn"],c:1},
+{q:"Koje su osnovne boje za formiranje kolor slike na ekranu?",o:["CMYK","RGB","CMY"],c:1},
+{q:"Koju proporciju slike je imao analogni TV i VHS video?",o:["4:3","16:9"],c:0},
+{q:"Može li senzor digitalne kamere detektovati boje svjetlosti?",o:["Da, naravno","Zavisi od vrste senzora","Ne, samo crno/bijelu svjetlost"],c:2},
+{q:"Šta su primitivi?",o:["Geometrijski likovi koji grade vektorsku sliku","Likovi za rasterizaciju vektora"],c:0},
+{q:"Koliko megapiksela ima VGA format slike (640×480)?",o:["0.3MP","3.1MP","3MP"],c:0},
+{q:"Kada se pravi crno-bijela nijansa formulom Y = 1/3R + 1/3G + 1/3B, Y je nijansa",o:["Bijele","Sive","Crne"],c:1},
+{q:"Koje SD kartice treba koristiti kod 4K videa?",o:["miniSD","SD","microSD","SDCX","SDXC"],c:4},
+{q:"Koji je danas najrašireniji interfejs za spajanje grafičkog adaptera?",o:["PCeX 2.3 i 28 MB/s","PCI Express i 28 MB/s","PCI Express i 31 GB/s","PCeX 2.3 i 31 TB/s"],c:2},
+{q:"Rasterizacija je postupak proračuna piksela iz vektorskih primitiva",o:["Da","Ne"],c:0},
+{q:"Koje podatke sadrži oblak tačaka?",o:["Podatke o vrsti objekata koji se trebaju skenirati","Koordinatne tačke, izračunate triangulacijom"],c:1},
+{q:"Koji optički fenomen koristi LCD za generisanje slike?",o:["Maxwellow zakon slike","Polarizacijski film","Rastersku matricu"],c:1},
+{q:"Za šta služi objektiv na digitalnoj kameri?",o:["Za izradu slike","Za fokusiranje slike","Za slike"],c:1},
+{q:"Može li piksel biti u obliku trokuta?",o:["Da","Ne"],c:1},
+{q:"Može li se iz oblaka tačaka izračunati površina 3D modela?",o:["Da","Ne"],c:0},
+{q:"Kada se ne mogu koristiti 3D skeneri tipa fringe-projection?",o:["Pri slabom osvjetljenju","Pri jakom osvjetljenju"],c:1},
+{q:"Čemu služi triangulacija?",o:["Za dobivanje oblaka tačaka iz postupka sličnosti trouglova","Za rastersku matricu","Za 3D skeniranje"],c:0},
+{q:"Da li je ekran pametnog telefona ulazni ili izlazni uređaj?",o:["Izlazni","Ulazni","Oboje"],c:2},
+{q:"U stanju da lociramo kameru u WCS — označiti šta NE pripada ovom procesu",o:["Izvršiti perspektivnu transformaciju","Sračunati matricu za konverziju vrhova iz CCS u WCS","Odrezati neželjene dijelove objekata","Konvertovati vrhove pomoću te matrice","Locirati i pozicionirati kameru"],c:1},
+{q:"Veličina zapisa zavisi od složenosti i broja objekata",o:["Da","Ne"],c:0},
+{q:"Množenje kvarterniona — označi ispravno",o:["kq = w[k v]","kq = v[w k]","kq = k[w v]"],c:2},
+{q:"Koji su dijelovi vektorskog grafičkog sistema?",o:["Sve navedeno + prikazna tablica","Vektorski generator, prikazni procesor, prikazna privremena memorija i prikazni uređaj","Samo vektorski generator i prikazni uređaj","Prikazna tablica, procesor i generator"],c:1},
+{q:"Ojlerova teorema je",o:["Zatvorena, zavisna na kompoziciju","Otvorena, zavisna na kompoziciju"],c:0},
+{q:"Šta znači skraćenica DDA?",o:["Digitalni derivirani analizator","Digitalni diferencijalni analizator"],c:1},
+{q:"Koja su dva koncepta interaktivne računarske grafike?",o:["Programski i parcijalni","Programski i sklopovski","Sklopovski i deduktivni","Parcijalni i deduktivni"],c:1},
+{q:"Šta je scan conversion?",o:["Pretvaranje rasterskih slika u idealan prikaz","Pretvaranje idealnih slika u rasterski prikaz"],c:1},
+{q:"Grafički sistem je posrednik između aplikacijskog programa i prikazanog uređaja",o:["Da","Ne"],c:0},
+{q:"Sistem bez preplitanja je interlaced",o:["Da","Ne"],c:1},
+{q:"Jedna tačka ima",o:["Najviše jedan bajt","Jedan ili više bajtova"],c:1},
+{q:"Postoji linearna i nelinearna interpolacija",o:["Da","Ne"],c:0},
+{q:"Tehnika središnje tačke — autori su",o:["Pitteway, Van Alt","Pitteway, Van Aken"],c:1},
+{q:"Koji je skalarni proizvod kvarterniona?",o:["q1q2 = w1w2 + x1x2 + y1y2 + z1z2","q1q2 = v1v2 + x1x2 + y1y2 + z1z2"],c:0},
+{q:"Šta sadrži aplikacijski model?",o:["Grafičke i aplikativne podatke","Geometrijske i negeometrijske podatke","Samo geometrijske podatke","Samo aplikativne podatke"],c:1},
+{q:"Rasterska ili bitmap grafika koristi piksele",o:["Da","Ne"],c:0},
+{q:"Najjednostavniji pristup modeliranju krive linije je",o:["Linearna aproksimacija (prvog reda) po dijelovima","Linearna aproksimacija (prvog reda) po poljima"],c:0},
+{q:"Koliko boja može imati jedan piksel?",o:["2","3","1"],c:2},
+{q:"Bézierova krivulja ima minimalno",o:["2 tačke","4 tačke","8 tačaka"],c:1},
+{q:"Kvarterioni se mogu predstaviti kao",o:["Kompleksni brojevi sa četiri imaginarna dijela","Kompleksni brojevi sa dva imaginarna dijela","Kompleksni brojevi sa tri imaginarna dijela"],c:2},
+{q:"Interpolacija je tehnika stvaranja međuslika pomoću računara",o:["Da","Ne"],c:0},
+{q:"Jednim bajtom se može prikazati",o:["128 boja","512 boja","64 boje","256 boja"],c:3},
+{q:"U 3D Kartezijevom prostoru, bilo koji par osa definiše ravan koja je u odnosu na treću osu...",o:["Paralelna je na treću","Siječe treću","Okomita je na treću"],c:2},
+{q:"Koju osobinu ima množenje kvarterniona?",o:["Asocijativno","Komutativno","Ništa od navedenog"],c:0},
+{q:"Množenje kvarterniona — označi što NIJE ispravno",o:["ki = j","ij = k","kj = i"],c:2},
+{q:"Bressenhamov algoritam je zasnovan na",o:["Aritmetici realnih brojeva","Aritmetici cijelih brojeva"],c:1},
+{q:"Terminali su ulazno/izlazni uređaji",o:["Da","Ne"],c:0},
+{q:"LUT znači",o:["Line up table","Look-up table"],c:1},
+{q:"Koji je nedostatak vektorske grafike?",o:["Potreba za stalnim transformacijama te nedostatak JPG vektorskog formata","Potreba za stalnim proračunima (opterećuje resurse) te nedostatak univerzalnog vektorskog formata"],c:1},
+{q:"Koji su uslovi Bézierove krive?",o:["Tri krajnje tačke i tri dodatne tačke koje određuju vektore smjera","Četiri krajnje tačke i četiri dodatne tačke","Dvije krajnje tačke i dvije dodatne tačke koje određuju vektore smjera u krajnjim tačkama"],c:2},
+{q:"Uobičajena rezolucija monitora je",o:["720 do 960 ppi","72 do 100 ppi","128 do 512 ppi"],c:1},
+{q:"Koji su uslovi Hermitove krive?",o:["Tri krajnje tačke i tri vektora smjera","Četiri krajnje tačke i četiri vektora smjera","Dvije krajnje tačke i dva vektora smjera u krajnjim tačkama"],c:2},
+{q:"Aditivni model se dobija dodavanjem svjetlosti na koju podlogu?",o:["Na sivu","Na crnu","Na bijelu"],c:1},
+{q:"Koji je nedostatak implicitnog oblika u primjenama računarske grafike?",o:["Teškoće s horizontalnim tangentama","Problem s kontinuitetom tangenti u dodirnim tačkama različitih segmenata","Nisu moguće višestruke vrijednosti x"],c:1},
+{q:"Tehnika četverobojne štampe koristi",o:["RGY matrice","RGB matrice","CMYK matrice"],c:2},
+{q:"Koji je nedostatak eksplicitnog oblika u primjenama računarske grafike?",o:["Nisu moguća popunjavanja poligona","Nije sačuvana rotacija invarijantnosti","Teškoće s horizontalnim tangentama"],c:1},
+{q:"LED displej na svakom pikselu ima",o:["Bijelu, crnu i sivu","Crvenu, zelenu i plavu","Crvenu, zelenu i žutu"],c:1},
+{q:"U stanju da lociramo kameru u WCS i usmjerimo je na skup objekata — označi šta NE pripada ovom procesu",o:["Konvertovati vrhove pomoću te matrice","Sračunati matricu za konverziju vrhova iz CCS u WCS","Izvršiti perspektivnu transformaciju","Odrezati neželjene dijelove objekata","Locirati i pozicionirati kameru"],c:1},
+{q:"Šta je pinhole kamera?",o:["Jednostavni box sa fotografskim filmom F naprijed i malom rupom H koja propušta svjetlo","Jednostavni box sa fotografskim filmom F pozadi i malom rupom H koja propušta svjetlo","Uređaj sa sočivima koji fokusira svjetlost na senzor","Ništa od navedenog"],c:1},
+{q:"Koji su tačni odnosi za imaginarne dijelove kvaterniona?",o:["ij = k, jk = i, ki = j","ij = j, jk = k, ki = i","ij = i, jk = j, ki = k","ij = −k, jk = −i, ki = −j"],c:0},
+{q:"Formula rotacije kvaterniona je",o:["q = [cos θ/2,  sin θ/2 · n]","q = [sin θ/2,  cos θ/2 · n]","q = [cos θ,  sin θ · n]","q = [sin θ,  cos θ · n]"],c:0},
+{q:"Šta je kompjuterska grafika?",o:["Oblast računarstva koja se bavi generisanjem, manipulacijom i prikazivanjem slika uz pomoć računara","Oblast računarstva koja se bavi isključivo 3D modeliranjem","Programski jezik za vizualizaciju podataka","Skup hardverskih komponenti za prikaz slike"],c:0},
+{q:"Koje su mane raster grafike?",o:["Gubi kvalitet pri uvećanju (pikselizacija)","Veće rezolucije zauzimaju više memorije","Manja fleksibilnost u uređivanju u poređenju s vektorskom grafikom","Može se beskonačno skalirati bez gubitka kvaliteta"],c:[0,1,2]},
+{q:"Gdje se upotrebljava SVG format?",o:["Za web grafiku","Za audio kompresiju","Za 3D modeliranje","Za video streaming"],c:0},
+{q:"Kod CRT-a, na koliko volti anoda ubrzava elektrone?",o:["1.000–5.000 V","5.000–10.000 V","15.000–20.000 V","50.000–100.000 V"],c:2},
+{q:"Bernstein-ovi polinomi stepena n su oblika",o:["Bi^n(t) = (n nad i) · t^i · (1−t)^(n−i)","Bi^n(t) = (n nad i) · t^(n−i) · (1−t)^i","Bi^n(t) = t^i + (1−t)^(n−i)","Bi^n(t) = n · t^i · (1−t)"],c:0},
+{q:"Šta predstavlja izvod Bézierove krive b'(t)?",o:["b'(t) = n · Σ B_i^(n−1)(t) · Δb_i","b'(t) = Σ B_i^n(t) · b_i","b'(t) = (n−1) · Σ B_i^n(t) · Δb_i","b'(t) = n · Σ B_i^n(t) · b_i"],c:0},
+{q:"Za koliko stepeni se povećava Bézierova kriva pri degree elevation?",o:["1","2","3","Zavisi od broja kontrolnih tačaka"],c:1},
+{q:"Koje od navedenih NIJE osnovno svojstvo Bézierove krive?",o:["Stepen krive definisane sa n+1 kontrolnih tačaka je n","Kriva b(t) prolazi kroz tačke b0 i bn","Kriva uvijek prolazi kroz sve kontrolne tačke","Svojstvo konveksnog omotača"],c:2},
+{q:"Šta je namjena GIF formata?",o:["Slika, niz slika ili animacija s malo boja","Fotorealistična slika visoke rezolucije","Kompresija bez gubitaka za medicinske slike","Video format visokih performansi"],c:0},
+{q:"Šta su baferi slike?",o:["Memorijski čipovi na grafičkoj kartici; svakom pikselu odgovara jedna lokacija u video memoriji","Algoritmi za kompresiju slike","Virtualni koordinatni sistemi za 3D prikaz","Sabirnice za prijenos podataka između CPU i GPU"],c:0},
+{q:"Koje od navedenog NIJE prednost vektorske grafike?",o:["Može se skalirati bez gubitka kvaliteta","Sve informacije su zapamćene i mogu se mijenjati","Može prikazati složene fotografske detalje i realističnu teksturu","Vektorske datoteke su često manje veličine"],c:2},
+{q:"Ako kriva ima n+1 kontrolnih tačaka, koji je njen stepen?",o:["n","n+1","n−1","2n"],c:0},
+{q:"Šta je Midpoint Line Algorithm?",o:["Algoritam za crtanje pravaca koji određivanjem srednje tačke odlučuje koje piksele treba obojiti","Algoritam za crtanje kružnica pomoću trigonometrije","Algoritam za rasterizaciju poligona liniju po liniju","Algoritam za anti-aliasing linija"],c:0},
+{q:"Šta su primitivi u vektorskoj grafici?",o:["Geometrijski likovi koji grade vektorsku sliku s promjenljivim atributima boje i debljine","Najmanji elementi rasterske slike","Matematičke funkcije za opis krivih","Bitmapske teksture"],c:0},
+{q:"Od koliko ekrana se sastoji pinhole kamera?",o:["Jednog","Dva","Tri","Četiri"],c:1},
+{q:"Kako se mogu ukloniti i prednji i stražnji poligoni u OpenGL-u?",o:["Korištenjem GL_FRONT_AND_BACK konstante","Samo brisanjem stražnjih poligona","Samo brisanjem prednjih poligona","Nije moguće ukloniti oboje istovremeno"],c:0},
+{q:"Broj segmenata u rasponu uzorka u postupku Watkinsa je...",o:["Konstantan i veći ili jednak jedan","Uvijek tačno jedan","Proporcionalan visini ekrana","Varijabilan i može biti nula"],c:0},
+{q:"Šta Tablica poligona (PT) NE sadrži?",o:["x-koordinatni početak koji ima manju y-koordinatu","Koeficijente jednadžbe ravnine","Zastavicu koja određuje je li poligon aktivan","Atribute kao što su boja i tekstura"],c:0},
+{q:"Koja formula se koristi za teorijsko pretvaranje RGB slike u crno-bijelu?",o:["Y = R/3 + G/3 + B/3","Y = 0.299·R + 0.587·G + 0.114·B","Y = (R + G + B) / 2","Y = R·0.5 + G·0.3 + B·0.2"],c:0},
+{q:"Šta nije dozvoljeno u afinom prostoru?",o:["Sabiranje tačaka","Sabiranje vektora","Množenje vektora skalarom","Translacija tačke vektorom"],c:0},
+{q:"Šta čini grupa mnogo trouglova koji aproksimiraju površinu složenog objekta?",o:["Mrežu trouglova (triangle mesh)","Oblak tačaka","Parametarsku krivu","Voksel mrežu"],c:0},
+{q:"Kako se mogu riješiti problemi interpolacije i presjeka kod video igara?",o:["Korištenjem baricentričnih koordinata","Korištenjem Bézierovih krivih","Korištenjem homogenih koordinata","Korištenjem kvaterniona"],c:0},
+{q:"Kakav mora biti zbir baricentričnih koordinata (λ1, λ2, λ3)?",o:["λ1 + λ2 + λ3 = 1","λ1 + λ2 + λ3 = 0","λ1 · λ2 · λ3 = 1","λ1 = λ2 = λ3"],c:0},
+{q:"Vidljiva svjetlost je dio spektra elektromagnetnog zračenja talasnih dužina",o:["Od 400–700 nm","Od 200–400 nm","Od 700–1000 nm","Od 100–300 nm"],c:0},
+// Parcijalni 2026
+{q:"Dato je: t=0.5, P0(0,0), P1(2,4), P2(6,0). Odrediti B(t).",o:["(3.5, 1)","(2.5, 1)","(2.5, 2)","(1.5, 2)"],c:2},
+{q:"Dvije osnovne operacije u realističnom rendiranju su:",o:["Transport (koliko svjetla dođe od jednog mjesta do drugog)","Raspršenje (kako površina reagira sa svjetlom)","Refleksija (odbijanje svjetla od površine)","Apsorpcija (upijanje svjetla)"],c:[0,1]},
+{q:"Matematičke operacije Bézierovih krivih:",o:["Kretanje vrha sastavljenog otvorenog poligona koja vodi na Bézierove težinske funkcije","Parametarsko dijeljenje vektora koje vodi na Bernsteinove težinske funkcije","Linearna interpolacija temenih tačaka","Rekurzivno dijeljenje segmenata"],c:[0,1]},
+{q:"1963. Ivan Sutherland je izumio:",o:["CAD","Sketchpad","OpenGL","JPEG kompresiju"],c:1},
+{q:"Kompjuterska grafika je:",o:["Grana računarskih nauka koja se bavi izgradnjom višedimenzijskih modela objekata i njihovim prikazom uz upotrebu računara","Grana računarskih nauka koja se bavi izgradnjom rasterskih modela objekata i njihovim prikazom uz upotrebu računara","Grana računarskih nauka koja se bavi izgradnjom vektorskih modela objekata i njihovim prikazom uz upotrebu računara","Oblast informatike za obradu teksta"],c:0},
+{q:"Grafički protočni sistem je:",o:["Flowchart — niz koraka koji opisuju proces renderiranja od ulaznih podataka do prikaza","Algoritam za sortiranje poligona","Format za zapis vektorske grafike","Sistemski interfejs za upravljanje memorijom"],c:0},
+{q:"DPI se koristi za:",o:["Sliku","Štampu","Monitor","Video"],c:1},
+{q:"Kompaktnost (u kontekstu vektorske grafike) znači:",o:["Mali memorijski zahtjevi","Čuva opis grafičkog dijela","Visoka rezolucija slike","Brzo renderiranje"],c:0},
+{q:"SVG format je format koje grafike?",o:["Vektorske","Rasterske","Nijedne od navedenih","Hibridne"],c:0},
+{q:"Bézierove krive su:",o:["Ništa od navedenog","Glatke krive koje mogu biti određene uređenim skupom kontrolnih tačaka; prva i zadnja kontrolna tačka su krajnje tačke krive","Izlomljene krive koje mogu biti određene uređenim skupom kontrolnih tačaka; prva i zadnja kontrolna tačka su krajnje tačke krive","Krive definirane jednadžbama drugog reda"],c:1},
+{q:"Vektorska grafika se zasniva na:",o:["Korišćenju geometrijskih oblika za predstavljanje/prezentaciju","Mreži piksela za prikaz slike","Kompresiji bitmapirane slike","Rasterizaciji pomoću GPU"],c:0}
+];
+
+const SETS=[
+  {t:"Kviz 1",r:[0,29],col:"#534AB7",light:"#EEEDFE"},
+  {t:"Kviz 2",r:[30,58],col:"#0F6E56",light:"#E1F5EE"},
+  {t:"Kviz 3",r:[59,88],col:"#993C1D",light:"#FAECE7"},
+  {t:"Kviz 4",r:[89,117],col:"#185FA5",light:"#E6F1FB"},
+  {t:"Kviz 5",r:[118,146],col:"#993556",light:"#FBEAF0"},
+  {t:"Parcijalni",r:[147,174],col:"#6B7B3A",light:"#F0F4E3"},
+  {t:"Parcijalni 2026",r:[175,185],col:"#B5680A",light:"#FDF0E0"}
+];
+
+let scores=new Array(7).fill(null);
+let si=0,cur=0,ans=[];
+let mistakeSet=[];
+let mistakeMode=false;
+let mistakeQuestions=[];
+
+
+function qs(i){ return mistakeMode ? mistakeQuestions : Q.slice(SETS[i].r[0],SETS[i].r[1]+1); }
+
+function renderMenu(){
+  mistakeMode=false;
+  let h=`<div class="header"><h1>KGR — Kompjuterska grafika i rasterizacija</h1><p>186 pitanja podijeljena u 5 kvizova + parcijalni + parcijalni 2026. Odaberi jedan i uradi ga u svom tempu.</p></div>`;
+  h+=`<div class="mgrid">`;
+  SETS.forEach((s,i)=>{
+    const q=qs(i);
+    const done=scores[i]!==null;
+    h+=`<div class="mc${done?' done':''}" onclick="startSet(${i})" style="border-top-color:${s.col}">`;
+    h+=`<div class="mn" style="color:${s.col}">${i+1}</div>`;
+    h+=`<div class="ml">${s.t}<br><span style="color:#aaa;font-size:10px">${q.length} pitanja</span></div>`;
+    if(done) h+=`<div class="ms" style="color:${s.col}">${scores[i].n}/${scores[i].t} ✓</div>`;
+    h+=`</div>`;
+  });
+  h+=`</div>`;
+  const totN=scores.filter(s=>s!==null).reduce((a,s)=>a+s.n,0);
+  const totT=scores.filter(s=>s!==null).reduce((a,s)=>a+s.t,0);
+  if(totT>0){
+    const pct=Math.round(totN/totT*100);
+    h+=`<div class="tot">Ukupni rezultat: <strong>${totN}/${totT}</strong> tačnih — ${pct}%</div>`;
+  }
+  // Show mistakes quiz card if there are any accumulated mistakes
+  if(mistakeSet.length>0){
+    h+=`<div style="margin-top:1.25rem">`;
+    h+=`<div class="mc-err" onclick="startMistakesQuiz()">`;
+    h+=`<div style="font-size:22px;font-weight:700;color:#A32D2D;line-height:1">✗</div>`;
+    h+=`<div style="font-size:13px;font-weight:600;margin-top:6px;color:#A32D2D">Kviz grešaka</div>`;
+    h+=`<div style="font-size:11px;color:var(--text-muted);margin-top:4px">${mistakeSet.length} pogrešnih pitanja</div>`;
+    h+=`</div></div>`;
+  }
+  document.getElementById('root').innerHTML=h;
+}
+
+function startSet(i){
+  mistakeMode=false;
+  si=i; cur=0;
+  ans=new Array(qs(i).length).fill(null);
+  renderQuiz();
+}
+
+function isMulti(q){ return Array.isArray(q.c); }
+function correctForQ(q){ return isMulti(q)?q.c:[q.c]; }
+function arrEq(a,b){ return a.length===b.length&&[...a].sort().every((v,i)=>[...b].sort()[i]===v); }
+
+function isAnswered(idx){ return ans[idx]!==null&&ans[idx].confirmed; }
+function answerCorrect(q,a){
+  if(!a||!a.confirmed) return false;
+  return arrEq(a.selected, correctForQ(q));
+}
+
+function renderQuiz(){
+  const questions=qs(si);
+  const q=questions[cur];
+  const s=mistakeMode ? {t:'Kviz grešaka',col:'#A32D2D',light:'#fcebeb'} : SETS[si];
+  const confirmed=isAnswered(cur);
+  const pct=Math.round((cur+1)/questions.length*100);
+  const correct=ans.filter((a,i)=>answerCorrect(questions[i],a)).length;
+  const done=ans.filter(a=>isAnswered(ans.indexOf(a))||a!==null&&a.confirmed).length;
+  const doneCount=ans.filter(a=>a&&a.confirmed).length;
+  const correctCount=ans.filter((a,i)=>answerCorrect(questions[i],a)).length;
+  const isLast=cur===questions.length-1;
+  const allDone=ans.every(a=>a&&a.confirmed);
+  const multi=isMulti(q);
+  const curSel=ans[cur]?ans[cur].selected:[];
+  const correctOpts=correctForQ(q);
+
+  let h=`<div class="quiz-header">`;
+  h+=`<button class="bk" onclick="renderMenu()">← Meni</button>`;
+  h+=`<span class="score-badge">${doneCount>0?correctCount+'/'+doneCount+' tačnih':s.t}</span>`;
+  h+=`</div>`;
+  h+=`<div class="pb"><div class="pf" style="width:${pct}%;background:${s.col}"></div></div>`;
+
+  h+=`<div class="qc">`;
+  h+=`<div class="qn">Pitanje ${cur+1} od ${questions.length}${multi?' &nbsp;·&nbsp; <span style="color:'+s.col+';font-weight:600">VIŠESTRUKI ODGOVOR</span>':''}</div>`;
+  h+=`<div class="qt">${q.q}</div>`;
+  h+=`<div class="opts">`;
+  q.o.forEach((opt,i)=>{
+    let cls='ob';
+    const isSelected=curSel.includes(i);
+    if(confirmed){
+      const isCorrectOpt=correctOpts.includes(i);
+      const wasSelected=curSel.includes(i);
+      if(isCorrectOpt) cls+=' cor';
+      else if(wasSelected&&!isCorrectOpt) cls+=' wr';
+    } else {
+      if(isSelected) cls+=' sel';
+    }
+    const checkmark=multi?`<span style="margin-left:auto;flex-shrink:0;font-size:13px;color:${isSelected&&!confirmed?'#534AB7':'var(--text-hint)'}">${isSelected?'☑':'☐'}</span>`:'';
+    h+=`<button class="${cls}" ${confirmed?'disabled':''} onclick="${multi?'toggle':'choose'}(${i})">`;
+    h+=`<span class="l">${String.fromCharCode(65+i)}.</span><span style="flex:1">${opt}</span>${checkmark}</button>`;
+  });
+  h+=`</div>`;
+
+  if(multi&&!confirmed&&curSel.length>0){
+    h+=`<button onclick="confirm()" style="margin-top:10px;width:100%;padding:10px;background:#534AB7;color:#fff;border:none;border-radius:var(--radius-sm);font-size:14px;font-weight:500;cursor:pointer">Potvrdi odgovor</button>`;
+  }
+
+  if(confirmed){
+    const ok=answerCorrect(q,ans[cur]);
+    h+=`<div class="fb ${ok?'ok':'no'}" style="margin-top:10px">`;
+    h+=`<span class="fb-icon">${ok?'✓':'✗'}</span>`;
+    if(ok){
+      h+=`<span>Tačno!</span>`;
+    } else {
+      const correctLabels=correctOpts.map(i=>String.fromCharCode(65+i)+'. '+q.o[i]).join(', ');
+      h+=`<span>Netačno. Tačan odgovor: <strong>${correctLabels}</strong></span>`;
+    }
+    h+=`</div>`;
+  }
+  h+=`</div>`;
+
+  h+=`<div class="nav">`;
+  h+=`<button class="nb" ${cur===0?'disabled':''} onclick="go(${cur-1})">← Nazad</button>`;
+  h+=`<span class="nav-center">${cur+1} / ${questions.length}</span>`;
+  if(isLast&&allDone){
+    h+=`<button class="nb p" onclick="showRes()">Završi →</button>`;
+  } else {
+    h+=`<button class="nb p" onclick="go(${cur+1})" ${(!confirmed||isLast)?'disabled':''}>Sljedeće →</button>`;
+  }
+  h+=`</div>`;
+
+  document.getElementById('root').innerHTML=h;
+}
+
+function choose(i){
+  if(ans[cur]&&ans[cur].confirmed) return;
+  ans[cur]={selected:[i],confirmed:true};
+  renderQuiz();
+}
+
+function toggle(i){
+  if(ans[cur]&&ans[cur].confirmed) return;
+  const cur_sel=ans[cur]?[...ans[cur].selected]:[];
+  const idx=cur_sel.indexOf(i);
+  if(idx===-1) cur_sel.push(i);
+  else cur_sel.splice(idx,1);
+  ans[cur]={selected:cur_sel,confirmed:false};
+  renderQuiz();
+}
+
+function confirm(){
+  if(!ans[cur]||ans[cur].selected.length===0) return;
+  ans[cur].confirmed=true;
+  renderQuiz();
+}
+
+function go(n){
+  const questions=qs(si);
+  if(n<0||n>=questions.length) return;
+  cur=n;
+  renderQuiz();
+}
+
+function showRes(){
+  const questions=qs(si);
+  const n=ans.filter((a,i)=>answerCorrect(questions[i],a)).length;
+  const t=questions.length;
+  const pct=Math.round(n/t*100);
+
+  let s;
+  if(mistakeMode){
+    s={t:'Kviz grešaka',col:'#A32D2D',light:'#fcebeb'};
+    // Update mistake set — remove correctly answered ones
+    const newWrong=[];
+    questions.forEach((q,i)=>{ if(!answerCorrect(q,ans[i])) newWrong.push(mistakeSet[i]); });
+    mistakeSet=newWrong;
+  } else {
+    // Save score and collect wrong answers
+    const wrongIdxs=questions.map((q,i)=>answerCorrect(q,ans[i])?null:i).filter(i=>i!==null);
+    const wrongQGlobal=wrongIdxs.map(i=>SETS[si].r[0]+i);
+    wrongQGlobal.forEach(gi=>{ if(!mistakeSet.includes(gi)) mistakeSet.push(gi); });
+    // Remove from mistakeSet any that were now answered correctly
+    questions.forEach((q,i)=>{ if(answerCorrect(q,ans[i])){ const gi=SETS[si].r[0]+i; const idx=mistakeSet.indexOf(gi); if(idx>-1) mistakeSet.splice(idx,1); } });
+    scores[si]={n,t};
+    s=SETS[si];
+  }
+
+  const grade=pct>=90?'Odlično!':pct>=75?'Vrlo dobro!':pct>=60?'Dobro, ima mjesta za napredak.':'Potrebno više vježbe.';
+  const icon=pct>=90?'★':pct>=75?'◆':pct>=60?'●':'○';
+
+  let h=`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.25rem">`;
+  h+=`<button class="bk" onclick="renderMenu()">← Meni</button>`;
+  h+=`<span style="font-size:13px;color:var(--text-muted)">${s.t}</span></div>`;
+  h+=`<div class="sc">`;
+  h+=`<div class="sc-icon" style="color:${s.col}">${icon}</div>`;
+  h+=`<div class="sb" style="color:${s.col}">${n}/${t}</div>`;
+  h+=`<div class="sc-msg">${grade} — ${pct}% tačnih odgovora</div>`;
+  h+=`<div class="sg">`;
+  h+=`<div class="sx"><div class="sx-val" style="color:#3B6D11">${n}</div><div class="sx-lbl">tačnih</div></div>`;
+  h+=`<div class="sx"><div class="sx-val" style="color:#A32D2D">${t-n}</div><div class="sx-lbl">netačnih</div></div>`;
+  h+=`</div>`;
+  h+=`<div class="sc-actions">`;
+  if(mistakeMode){
+    h+=`<button class="nb" onclick="startMistakesQuiz()">Ponovi greške</button>`;
+  } else {
+    h+=`<button class="nb" onclick="startSet(${si})">Ponovi kviz</button>`;
+  }
+  h+=`<button class="nb" onclick="showReview()">Pregled pitanja</button>`;
+  h+=`<button class="nb p" onclick="renderMenu()">Meni →</button>`;
+  h+=`</div></div>`;
+  document.getElementById('root').innerHTML=h;
+}
+
+function showReview(){
+  const questions=mistakeMode ? mistakeQuestions : qs(si);
+  const s=mistakeMode ? {t:'Kviz grešaka',col:'#A32D2D'} : SETS[si];
+  let h=`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.25rem">`;
+  h+=`<button class="bk" onclick="showRes()">← Rezultati</button>`;
+  h+=`<span style="font-size:13px;color:var(--text-muted)">Pregled — ${s.t}</span></div>`;
+  questions.forEach((q,i)=>{
+    const ok=answerCorrect(q,ans[i]);
+    const correctOpts=correctForQ(q);
+    const selectedOpts=ans[i]?ans[i].selected:[];
+    h+=`<div class="rv-item">`;
+    h+=`<span class="rv-tag ${ok?'ok':'no'}">${ok?'✓ Tačno':'✗ Netačno'}</span>`;
+    h+=`<div class="rv-q">${i+1}. ${q.q}</div>`;
+    q.o.forEach((opt,j)=>{
+      const isCorrect=correctOpts.includes(j);
+      const wasSelected=selectedOpts.includes(j);
+      let cls='neu';
+      if(isCorrect) cls='cor';
+      else if(wasSelected&&!isCorrect) cls='wr';
+      const icon=isCorrect?'✓':wasSelected?'✗':'';
+      h+=`<div class="rv-opt ${cls}"><span class="l">${String.fromCharCode(65+j)}.</span><span style="flex:1">${opt}</span>${icon?`<span style="flex-shrink:0">${icon}</span>`:''}</div>`;
+    });
+    h+=`</div>`;
+  });
+  h+=`<div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin:1.5rem 0">`;
+  if(mistakeMode){
+    h+=`<button class="nb" onclick="startMistakesQuiz()">Ponovi greške</button>`;
+  } else {
+    h+=`<button class="nb" onclick="startSet(${si})">Ponovi kviz</button>`;
+  }
+  h+=`<button class="nb p" onclick="renderMenu()">Meni →</button>`;
+  h+=`</div>`;
+  document.getElementById('root').innerHTML=h;
+  window.scrollTo(0,0);
+}
+
+function startMistakesQuiz(){
+  if(mistakeSet.length===0) return;
+  mistakeQuestions=mistakeSet.map(gi=>Q[gi]);
+  mistakeMode=true;
+  si=-1; cur=0;
+  ans=new Array(mistakeQuestions.length).fill(null);
+  renderQuiz();
+}
+
+
+renderMenu();
+</script>
+</body>
+</html>
